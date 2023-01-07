@@ -14,6 +14,7 @@ const logSymbols = require("log-symbols");
 const markdown = require("gulp-markdown");
 const fileinclude = require("gulp-file-include");
 const cache = require("gulp-cache");
+const rename = require('gulp-rename');
 
 // class TailwindExtractor {
 //   static extract(content) {
@@ -45,9 +46,7 @@ function previewReload(done) {
 
 task("dev-html", (done) => {
   src([
-    options.paths.src.base + "/views/*.html",
-    options.paths.src.base + "/views/**/admin-dashboards/*.html",
-    options.paths.src.base + "/views/**/home-pages/*.html",
+    options.paths.src.base + "/views/*.html"
   ])
     .pipe(fileinclude({ prefix: "@" }))
     .pipe(dest(options.paths.dist.base));
@@ -60,9 +59,7 @@ task("dev-html", (done) => {
 
 task("build-html", (done) => {
   src([
-    options.paths.src.base + "/views/*.html",
-    options.paths.src.base + "/views/**/admin-dashboards/*.html",
-    options.paths.src.base + "/views/**/home-pages/*.html",
+    options.paths.src.base + "/views/*.html"
   ])
     .pipe(fileinclude({ prefix: "@" }))
     .pipe(dest(options.paths.build.base));
@@ -83,7 +80,7 @@ task("dev-styles", () => {
   return (
     src(options.paths.src.css + "/**/*.scss")
       .pipe(sass().on("error", sass.logError))
-
+      .pipe(rename({ suffix : ".min"}))
       .pipe(dest(options.paths.dist.css))
   );
 });
@@ -92,13 +89,14 @@ task("dev-styles", () => {
 task("build-styles", () => {
   return src(options.paths.dist.css + "/**/*")
     .pipe(cleanCSS({ compatibility: "ie8" }))
+    .pipe(rename({ suffix : ".min"}))
     .pipe(dest(options.paths.build.css));
 });
 
 //merging all script files to a single file
 task("dev-scripts", () => {
-  return src([options.paths.src.js + "/app.js"])
-    .pipe(concat({ path: "scripts.js" }))
+  return src([options.paths.src.js + "/**/*.js"])
+    .pipe(rename({ suffix : ".min"}))
     .pipe(dest(options.paths.dist.js));
 });
 
@@ -139,9 +137,9 @@ task("build-copy-css-plugins", function () {
 //merging all script files to a single file
 task("build-scripts", () => {
   return (
-    src([options.paths.src.js + "/app.js"])
-      .pipe(concat({ path: "scripts.js" }))
-      //    .pipe(uglify())
+    src([options.paths.src.js + "/**/*.js"])
+      .pipe(uglify())
+      .pipe(rename({ suffix : ".min"}))
       .pipe(dest(options.paths.build.js))
   );
 });
